@@ -23,6 +23,8 @@ class SpatialSimilarity:
 			self.masker = Masker(mask_path=mask_img)
 		else:
 			self.masker = None
+		self.local_3d_kernel = None
+		self.local_2d_kernel = None
 
 	def local_IoU_1d(self, n1, n2, window_size=3, padding=1):
 		n1 = padding_1d(n1, padding=padding)
@@ -44,3 +46,13 @@ class SpatialSimilarity:
 		union = np.logical_or(np.array(cnt_2_ls), np.array(cnt_1_ls))
 		union = np.count_nonzero(union)
 		return intersect / union
+
+	def local_IoU_3d(self, n1, n2, window_size=3, padding=1):
+		self.local_3d_kernel = torch.tensor(np.ones((window_size, window_size, window_size)),
+											dtype=torch.float,
+											requires_grad=False).view(1, 1,
+																	  window_size, window_size, window_size)
+		n1_3d = self.masker.inverse_transform2tensor(n1).unsqueeze(1)
+		n2_3d = self.masker.inverse_transform2tensor(n2).unsqueeze(1)
+		cnt_1 = F.conv3d(n1_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1)
+		cnt_2 = F.conv3d(n2_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1)
