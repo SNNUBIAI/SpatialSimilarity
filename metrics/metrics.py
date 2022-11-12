@@ -47,6 +47,23 @@ class SpatialSimilarity:
 		union = np.count_nonzero(union)
 		return intersect / union
 
+	@torch.no_grad()
+	def local_IoU_2d(self, n1, n2, window_size=3, padding=1):
+		"""
+		:param n1: (1*1*H*W)
+		:param n2: (1*1*H*W)
+		:return: local IoU
+		"""
+		self.local_2d_kernel = torch.tensor(np.ones((window_size, window_size)),
+											dtype=torch.float,
+											requires_grad=False).view(1, 1, window_size, window_size)
+		n1 = torch.tensor(n1, dtype=torch.float)
+		n2 = torch.tensor(n1, dtype=torch.float)
+		cnt_1 = F.conv2d(n1, self.local_2d_kernel, padding=(padding, padding), stride=1).detach().cpu().numpy()
+		cnt_2 = F.conv2d(n2, self.local_2d_kernel, padding=(padding, padding), stride=1).detach().cpu().numpy()
+		return IoU(cnt_1.flatten(), cnt_2.flatten())
+		
+	@torch.no_grad()
 	def local_IoU_3d(self, n1, n2, window_size=3, padding=1):
 		self.local_3d_kernel = torch.tensor(np.ones((window_size, window_size, window_size)),
 											dtype=torch.float,
