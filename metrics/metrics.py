@@ -25,19 +25,22 @@ class SpatialSimilarity:
 			self.masker = None
 
 	def local_IoU_1d(self, n1, n2, window_size=3, padding=1):
-		union = np.logical_or(n1, n2)
-		union = np.count_nonzero(union)
-
 		n1 = padding_1d(n1, padding=padding)
 		n2 = padding_1d(n2, padding=padding)
 
 		intersect = 0
+		cnt_1_ls = []
+		cnt_2_ls = []
 		for i in range(0, n1.shape[1]):
 			t1 = n1[:, i:i+window_size]
 			t2 = n2[:, i:i+window_size]
 
 			cnt_1 = np.count_nonzero(t1)
 			cnt_2 = np.count_nonzero(t2)
+			cnt_1_ls.append(cnt_1)
+			cnt_2_ls.append(cnt_2)
 			if cnt_1 > 0 and cnt_2 > 0:
 				intersect += 1
+		union = np.logical_or(np.array(cnt_2_ls), np.array(cnt_1_ls))
+		union = np.count_nonzero(union)
 		return intersect / union
