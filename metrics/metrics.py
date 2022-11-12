@@ -61,7 +61,7 @@ class SpatialSimilarity:
 		n2 = torch.tensor(n1, dtype=torch.float)
 		cnt_1 = F.conv2d(n1, self.local_2d_kernel, padding=(padding, padding), stride=1).detach().cpu().numpy()
 		cnt_2 = F.conv2d(n2, self.local_2d_kernel, padding=(padding, padding), stride=1).detach().cpu().numpy()
-		return IoU(cnt_1.flatten(), cnt_2.flatten())
+		return IoU(cnt_1.flatten().reshape(1, -1), cnt_2.flatten().reshape(1, -1))
 		
 	@torch.no_grad()
 	def local_IoU_3d(self, n1, n2, window_size=3, padding=1):
