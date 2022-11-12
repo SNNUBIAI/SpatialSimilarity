@@ -54,5 +54,10 @@ class SpatialSimilarity:
 																	  window_size, window_size, window_size)
 		n1_3d = self.masker.inverse_transform2tensor(n1).unsqueeze(1)
 		n2_3d = self.masker.inverse_transform2tensor(n2).unsqueeze(1)
-		cnt_1 = F.conv3d(n1_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1)
-		cnt_2 = F.conv3d(n2_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1)
+		cnt_1 = F.conv3d(n1_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1).squeeze(1)
+		cnt_2 = F.conv3d(n2_3d, self.local_3d_kernel, padding=(padding, padding, padding), stride=1).squeeze(1)
+		
+		cnt_1 = self.masker.tensor_transform(cnt_1)
+		cnt_2 = self.masker.tensor_transform(cnt_2)
+		
+		return IoU(cnt_1, cnt_2)
